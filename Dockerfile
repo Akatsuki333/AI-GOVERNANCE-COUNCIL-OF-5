@@ -9,14 +9,14 @@ RUN apt-get update && apt-get install -y \
     git \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements
-COPY requirements.txt .
-
-# Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy application code
+# Copy application code and dependency metadata
 COPY . .
+
+# Install Python dependencies when a requirements manifest is present.
+# This keeps the image build valid for repositories that do not use pip requirements.txt.
+RUN if [ -f requirements.txt ]; then \
+        pip install --no-cache-dir -r requirements.txt; \
+    fi
 
 # Expose gRPC port
 EXPOSE 50051
